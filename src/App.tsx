@@ -11,7 +11,10 @@ import { SessionTimeoutManager } from './components/SessionTimeoutManager';
 import { authClient } from './lib/auth-client';
 
 
-const API_URL = 'http://localhost:3000';
+// API URL: configured via VITE_API_URL env var at build time
+// In production: set VITE_API_URL=https://hris.baitulquranalikhwan.cloud
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 
 function Login() {
   const navigate = useNavigate();
