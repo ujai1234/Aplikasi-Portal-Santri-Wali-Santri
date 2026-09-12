@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { 
-  User, CalendarDays, RefreshCw, MessageSquare, 
-  CheckCircle2, Award, CreditCard, Sparkles, Clock, 
-  ChevronRight, FileText, LogOut, UploadCloud, Check
+  User, RefreshCw, 
+  CheckCircle2, Sparkles, Clock, 
+  ChevronRight, LogOut, UploadCloud, Check
 } from 'lucide-react';
 import { FamilyProfile } from './components/FamilyProfile';
 import { BrandLogo } from './components/BrandLogo';
