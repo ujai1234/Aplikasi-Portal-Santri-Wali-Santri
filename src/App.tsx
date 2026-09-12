@@ -38,17 +38,22 @@ function Login() {
         try {
           const studentRes = await fetch(`${API_URL}/api/parents/${data.user.id}/student`, { credentials: 'include' });
           const studentData = await studentRes.json();
-          const studentId = studentData?.data?.id || 'S-001';
-          const studentName = studentData?.data?.name || 'Abdullah Faqih';
-
-          const userWithStudent = { ...data.user, studentId, studentName }; 
-          localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudent));
-          navigate('/dashboard');
+          
+          if (studentData?.data?.id) {
+            const studentId = studentData.data.id;
+            const studentName = studentData.data.name;
+            const userWithStudent = { ...data.user, studentId, studentName }; 
+            localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudent));
+            navigate('/dashboard');
+          } else {
+            // No student linked yet
+            localStorage.setItem('portal_santri_user', JSON.stringify({ ...data.user }));
+            navigate('/link-student');
+          }
         } catch (fetchErr) {
           console.error(fetchErr);
-          const userWithStudent = { ...data.user, studentId: 'S-001', studentName: 'Abdullah Faqih' }; 
-          localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudent));
-          navigate('/dashboard');
+          alert('Terjadi kesalahan saat memuat data santri.');
+          setIsLoading(false);
         }
       }
     } catch (error) {
@@ -784,11 +789,137 @@ function Dashboard() {
   );
 }
 
+function LinkStudent() {
+  const navigate = useNavigate();
+  const [nis, setNis] = useState('');
+  const [nik, setNik] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const data = localStorage.getItem('portal_santri_user');
+    if (!data) {
+      navigate('/login');
+    } else {
+      setUser(JSON.parse(data));
+    }
+  }, [navigate]);
+
+  const handleLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/portal/link-student`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          nis,
+          nik
+        })
+      });
+      
+      const responseData = await res.json();
+      
+      if (res.ok && responseData.success) {
+        const studentId = responseData.data.id;
+        const studentName = responseData.data.name;
+        const userWithStudent = { ...user, studentId, studentName };
+        localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudent));
+        
+        alert(responseData.message || 'Berhasil menghubungkan akun dengan data santri.');
+        navigate('/dashboard');
+      } else {
+        alert(responseData.error || 'Gagal menghubungkan data santri. Mohon periksa kembali NIS dan NIK.');
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan jaringan.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#faf9f6] flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative background glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] bg-emerald-600/15 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-amber-500/15 blur-[120px] rounded-full pointer-events-none"></div>
+
+      <div className="w-full max-w-md space-y-6 animate-fade-up z-10 relative">
+        <div className="flex flex-col items-center text-center">
+          <div className="mb-3 relative group">
+            <BrandLogo size="lg" className="transition-transform duration-300 hover:scale-105 filter drop-shadow-xl" />
+          </div>
+          <h2 className="text-2xl font-display font-extrabold text-slate-900 tracking-tight">
+            Hubungkan Data Santri
+          </h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Demi keamanan, mohon masukkan NIS dan NIK santri untuk menghubungkan akun Anda.
+          </p>
+        </div>
+
+        <div className="bg-white/95 backdrop-blur-xl py-8 px-6 shadow-islamic rounded-3xl border border-slate-200/80 border-t-4 border-t-emerald-600">
+          <form className="space-y-5" onSubmit={handleLink}>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Nomor Induk Santri (NIS)
+              </label>
+              <input
+                type="text"
+                required
+                value={nis}
+                onChange={(e) => setNis(e.target.value)}
+                placeholder="Contoh: 2026001"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Nomor Induk Kependudukan (NIK)
+              </label>
+              <input
+                type="text"
+                required
+                value={nik}
+                onChange={(e) => setNik(e.target.value)}
+                placeholder="16 Digit NIK Santri"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isLoading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Memvalidasi...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Hubungkan Data</span>
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/link-student" element={<LinkStudent />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
