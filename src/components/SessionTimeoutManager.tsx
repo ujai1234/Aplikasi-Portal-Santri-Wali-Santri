@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Clock, ShieldAlert, LogOut, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SESSION_DURATION_SECONDS = 5 * 60; // 300 detik (5 menit)
@@ -99,63 +98,35 @@ export const SessionTimeoutManager: React.FC = () => {
   if (!showWarning) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden font-sans animate-in zoom-in-95 duration-200">
-        {/* Header Peringatan */}
-        <div className="bg-amber-50/90 p-5 flex items-center gap-3.5 border-b border-amber-200/70">
-          <div className="bg-amber-100 p-2.5 rounded-xl shrink-0">
-            <ShieldAlert className="w-5 h-5 text-amber-800" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">Sesi Login Segera Berakhir</h3>
-            <p className="text-xs text-amber-900/80 mt-0.5">Batas sesi 5 menit demi privasi & keamanan.</p>
-          </div>
-        </div>
-
-        {/* Konten & Countdown */}
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-sm overflow-hidden font-sans animate-in zoom-in-95 duration-200">
         <div className="p-6 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-50/50 border-2 border-amber-300 mb-4 shadow-sm">
-            <div className="flex flex-col items-center">
-              <Clock className="w-4 h-4 text-amber-600 mb-0.5 animate-pulse" />
-              <span className="text-xl font-bold text-slate-900 font-mono tracking-tight">
-                {formatCountdown(secondsRemaining)}
-              </span>
-            </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Sesi Segera Berakhir</h3>
+          
+          <div className="text-3xl font-bold text-amber-600 font-mono tracking-tight mb-3">
+            {formatCountdown(secondsRemaining)}
           </div>
-
-          <p className="text-slate-600 text-xs max-w-xs mx-auto mb-2 leading-relaxed">
-            Tidak ada aktivitas baru. Sesi Anda akan otomatis ditutup dalam <strong>{secondsRemaining} detik</strong>.
-          </p>
-          <p className="text-slate-400 text-[11px] max-w-xs mx-auto mb-6">
-            Klik <strong>Perpanjang Sesi</strong> untuk melanjutkan.
+          
+          <p className="text-slate-500 text-sm mb-6">
+            Sesi Anda akan ditutup otomatis karena tidak ada aktivitas.
           </p>
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={logout}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors cursor-pointer shadow-sm"
+              className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-colors cursor-pointer"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Keluar</span>
+              Keluar
             </button>
             <button
               type="button"
               onClick={extendSession}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition-colors cursor-pointer shadow-sm"
+              className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-colors cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Perpanjang Sesi</span>
+              Perpanjang
             </button>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="bg-slate-50/70 px-5 py-2.5 border-t border-slate-100 text-center">
-          <span className="text-[10px] text-slate-400 font-medium">
-            Proteksi Akses Portal Santri Baitul Qur'an
-          </span>
         </div>
       </div>
     </div>
