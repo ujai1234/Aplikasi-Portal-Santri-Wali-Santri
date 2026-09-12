@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Save, ShieldCheck } from 'lucide-react';
 
 
-const API_URL = 'http://localhost:3000'; 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const FamilyProfile = () => {
   const [parentData, setParentData] = useState<any>(null);
@@ -23,7 +23,7 @@ export const FamilyProfile = () => {
 
   useEffect(() => {
     if (currentUser.id) {
-      fetch(`${API_URL}/api/parents/${currentUser.id}`)
+      fetch(`${API_URL}/api/parents/${currentUser.id}`, { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
           if (data.data) {
@@ -60,6 +60,7 @@ export const FamilyProfile = () => {
     try {
       const res = await fetch(`${API_URL}/api/parents/${parentData.id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });

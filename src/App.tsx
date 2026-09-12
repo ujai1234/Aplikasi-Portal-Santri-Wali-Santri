@@ -36,7 +36,7 @@ function Login() {
         setIsLoading(false);
       } else if (data.token && data.user) {
         try {
-          const studentRes = await fetch(`${API_URL}/api/parents/${data.user.id}/student`);
+          const studentRes = await fetch(`${API_URL}/api/parents/${data.user.id}/student`, { credentials: 'include' });
           const studentData = await studentRes.json();
           const studentId = studentData?.data?.id || 'S-001';
           const studentName = studentData?.data?.name || 'Abdullah Faqih';
@@ -144,7 +144,7 @@ function AttendanceWidget({ studentId }: { studentId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/students/${studentId}/attendances`)
+    fetch(`${API_URL}/api/students/${studentId}/attendances`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setAttendances(Array.isArray(data) ? data : []);
@@ -252,7 +252,7 @@ function FinanceWidget({ studentId }: { studentId: string }) {
 
   const fetchPayments = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/payments`);
+      const res = await fetch(`${API_URL}/api/payments`, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         const studentPayments = (data.data || []).filter((p: any) => p.studentId === studentId);
@@ -282,6 +282,7 @@ function FinanceWidget({ studentId }: { studentId: string }) {
             const base64String = reader.result;
             const res = await fetch(`${API_URL}/api/students/${studentId}/payments/${payId}/upload`, {
               method: 'POST',
+              credentials: 'include',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ receiptUrl: base64String })
             });
@@ -381,7 +382,7 @@ function TahfidzWidget({ studentId }: { studentId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/tahfidz/student-progress/${studentId}`)
+    fetch(`${API_URL}/api/tahfidz/student-progress/${studentId}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setTahfidz(data.data);
@@ -516,7 +517,7 @@ function AcademicsWidget({ studentId }: { studentId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/students/${studentId}/academics`)
+    fetch(`${API_URL}/api/students/${studentId}/academics`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.grades) {
@@ -595,7 +596,7 @@ function CommunicationBookWidget({ studentId }: { studentId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/students/${studentId}/notes`)
+    fetch(`${API_URL}/api/students/${studentId}/notes`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setNotes(data.data || []);
