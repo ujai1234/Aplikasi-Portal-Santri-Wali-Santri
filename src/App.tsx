@@ -174,19 +174,9 @@ function AttendanceWidget({ studentId }: { studentId: string }) {
 
   return (
     <div className="bqa-card p-6">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100">
-            <CalendarDays className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 tracking-tight">Rekap Kehadiran</h3>
-            <p className="text-xs text-slate-500 font-medium">Bulan Ini • Tingkat Kehadiran: <span className="font-bold text-emerald-700">{attendanceRate}%</span></p>
-          </div>
-        </div>
-        <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-          Presensi Santri
-        </span>
+      <div className="mb-5 pb-3 border-b border-slate-100">
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">Rekap Kehadiran</h3>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">Bulan Ini • Tingkat Kehadiran: <span className="font-bold text-emerald-700">{attendanceRate}%</span></p>
       </div>
 
       {/* Modern Progress Bar */}
@@ -313,19 +303,9 @@ function FinanceWidget({ studentId }: { studentId: string }) {
 
   return (
     <div className="bqa-card p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-            <CreditCard className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 tracking-tight">Informasi Keuangan</h3>
-            <p className="text-xs text-slate-500 font-medium">Tagihan SPP & Syahriah Bulanan</p>
-          </div>
-        </div>
-        <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-          SPP Santri
-        </span>
+      <div className="mb-5 pb-3 border-b border-slate-100">
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">Informasi Keuangan</h3>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">Tagihan SPP & Syahriah Bulanan</p>
       </div>
 
       {payments.length === 0 ? (
@@ -408,19 +388,9 @@ function TahfidzWidget({ studentId }: { studentId: string }) {
 
   return (
     <div className="bqa-card p-6">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100">
-            <Award className="w-5 h-5 text-[#d97706]" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 tracking-tight">Hafalan & Tahfidz Al-Qur'an</h3>
-            <p className="text-xs text-slate-500 font-medium">Progres & Hasil Ujian Tasmi'</p>
-          </div>
-        </div>
-        <span className="text-[11px] font-bold text-[#d97706] bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-          Program Tahfidz
-        </span>
+      <div className="mb-5 pb-3 border-b border-slate-100">
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">Hafalan & Tahfidz Al-Qur'an</h3>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">Progres & Hasil Ujian Tasmi'</p>
       </div>
 
       {tahfidz ? (
@@ -542,19 +512,9 @@ function AcademicsWidget({ studentId }: { studentId: string }) {
 
   return (
     <div className="bqa-card p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-            <FileText className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 tracking-tight">Rapor Mini & Evaluasi Tugas</h3>
-            <p className="text-xs text-slate-500 font-medium">Capaian Pembelajaran Akademik</p>
-          </div>
-        </div>
-        <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
-          Akademik
-        </span>
+      <div className="mb-5 pb-3 border-b border-slate-100">
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">Rapor Mini & Evaluasi Tugas</h3>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">Capaian Pembelajaran Akademik</p>
       </div>
 
       {grades.length === 0 ? (
@@ -619,19 +579,9 @@ function CommunicationBookWidget({ studentId }: { studentId: string }) {
 
   return (
     <div className="bqa-card p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-100">
-            <MessageSquare className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 tracking-tight">Buku Penghubung & Catatan Kedisiplinan</h3>
-            <p className="text-xs text-slate-500 font-medium">Informasi & Evaluasi Perkembangan dari Muallim/Muallimah</p>
-          </div>
-        </div>
-        <span className="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200">
-          Buku Penghubung
-        </span>
+      <div className="mb-5 pb-3 border-b border-slate-100">
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">Buku Penghubung & Catatan</h3>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">Informasi & Evaluasi dari Muallim</p>
       </div>
 
       {notes.length === 0 ? (
@@ -755,7 +705,7 @@ function Dashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 animate-fade-up">
         {/* Salam & Santri Hero Banner */}
-        <div className="bg-gradient-to-r from-[#065f46] via-[#047857] to-[#065f46] text-white rounded-3xl shadow-xl p-6 sm:p-8 mb-8 relative overflow-hidden border-b-4 border-[#d97706]">
+        <div className="bg-gradient-to-r from-emerald-800 to-emerald-900 text-white rounded-3xl shadow-md p-6 sm:p-8 mb-8 relative overflow-hidden">
           {/* SVG Geometric Pattern Overlay */}
           <div 
             className="absolute inset-0 opacity-10 pointer-events-none bg-repeat"
@@ -766,13 +716,8 @@ function Dashboard() {
 
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <div className="relative">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 backdrop-blur-md border-2 border-amber-400/60 flex items-center justify-center shadow-inner">
-                  <User className="w-9 h-9 text-amber-300" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 bg-amber-500 text-white p-1 rounded-full text-xs font-bold border border-white">
-                  ✓
-                </div>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner">
+                <User className="w-8 h-8 text-emerald-100" />
               </div>
               <div>
                 <p className="font-arabic text-amber-300 text-sm font-medium tracking-wide mb-1">
