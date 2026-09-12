@@ -19,7 +19,7 @@
   }
 
   .bqa-card {
-    @apply bg-white rounded-2xl border border-slate-100 shadow-sm transition-all duration-300;
+    @apply bg-white rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 h-full flex flex-col;
   }
   .bqa-card:hover {
     @apply border-slate-200 shadow-md;

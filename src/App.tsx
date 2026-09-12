@@ -757,19 +757,18 @@ function Dashboard() {
 
         {/* Dynamic View Tab */}
         {activeTab === 'HOME' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Main Column (8 cols on lg) */}
-            <div className="lg:col-span-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            <div className="md:col-span-2">
               <TahfidzWidget studentId={user.studentId} />
-              <AttendanceWidget studentId={user.studentId} />
-              <AcademicsWidget studentId={user.studentId} />
             </div>
-
-            {/* Side Column (4 cols on lg) */}
-            <div className="lg:col-span-4 space-y-6">
-              <FinanceWidget studentId={user.studentId} />
-              <CommunicationBookWidget studentId={user.studentId} />
-            </div>
+            
+            <FinanceWidget studentId={user.studentId} />
+            
+            <AttendanceWidget studentId={user.studentId} />
+            
+            <AcademicsWidget studentId={user.studentId} />
+            
+            <CommunicationBookWidget studentId={user.studentId} />
           </div>
         ) : (
           <FamilyProfile />
