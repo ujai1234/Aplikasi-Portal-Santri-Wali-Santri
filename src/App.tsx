@@ -36,18 +36,16 @@ function Login() {
         setIsLoading(false);
       } else if (data.token && data.user) {
         try {
-          const studentRes = await fetch(`${API_URL}/api/parents/${data.user.id}/student`, { credentials: 'include' });
+          const studentRes = await fetch(`${API_URL}/api/parents/${data.user.id}/students`, { credentials: 'include' });
           const studentData = await studentRes.json();
           
-          if (studentData?.data?.id) {
-            const studentId = studentData.data.id;
-            const studentName = studentData.data.name;
-            const userWithStudent = { ...data.user, studentId, studentName }; 
-            localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudent));
+          if (studentData?.data && Array.isArray(studentData.data) && studentData.data.length > 0) {
+            const userWithStudents = { ...data.user, students: studentData.data }; 
+            localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudents));
             navigate('/dashboard');
           } else {
             // No student linked yet
-            localStorage.setItem('portal_santri_user', JSON.stringify({ ...data.user }));
+            localStorage.setItem('portal_santri_user', JSON.stringify({ ...data.user, students: [] }));
             navigate('/link-student');
           }
         } catch (fetchErr) {
@@ -59,6 +57,17 @@ function Login() {
     } catch (error) {
       alert('Terjadi kesalahan jaringan');
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: '/dashboard'
+      });
+    } catch (error) {
+      alert('Gagal login menggunakan Google.');
     }
   };
 
@@ -132,6 +141,26 @@ function Login() {
               )}
             </button>
           </form>
+
+          <div className="mt-5 mb-5 flex items-center gap-3">
+            <div className="flex-1 h-px bg-slate-200"></div>
+            <span className="text-xs font-semibold text-slate-400 uppercase">Atau</span>
+            <div className="flex-1 h-px bg-slate-200"></div>
+          </div>
+
+          <button
+            onClick={handleGoogleLogin}
+            type="button"
+            className="w-full flex justify-center items-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl shadow-sm text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all cursor-pointer"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            <span>Masuk dengan Google</span>
+          </button>
 
           <div className="mt-6 pt-5 border-t border-slate-100 text-center">
             <p className="text-xs text-slate-500">
@@ -624,6 +653,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'HOME' | 'PROFILE'>('HOME');
+  const [activeStudentIndex, setActiveStudentIndex] = useState(0);
 
   useEffect(() => {
     const data = localStorage.getItem('portal_santri_user');
@@ -635,6 +665,9 @@ function Dashboard() {
   }, [navigate]);
 
   if (!user) return null;
+
+  const studentsList = user.students || [];
+  const activeStudent = studentsList[activeStudentIndex] || { id: 'STR-001', name: 'Data Tidak Ditemukan' };
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
@@ -728,18 +761,35 @@ function Dashboard() {
                 <p className="font-arabic text-amber-300 text-sm font-medium tracking-wide mb-1">
                   بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                 </p>
-                <h1 className="text-2xl sm:text-3xl font-display font-extrabold tracking-tight text-white">
-                  {user.studentName || 'Abdullah Faqih'}
-                </h1>
+                
+                {studentsList.length > 1 ? (
+                  <div className="mb-2">
+                    <select
+                      value={activeStudentIndex}
+                      onChange={(e) => setActiveStudentIndex(Number(e.target.value))}
+                      className="bg-emerald-900/50 border border-emerald-600 text-white text-lg font-display font-extrabold rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-300 focus:outline-none appearance-none cursor-pointer pr-10 hover:bg-emerald-800 transition-colors"
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1.25em' }}
+                    >
+                      {studentsList.map((s: any, idx: number) => (
+                        <option key={s.id} value={idx} className="bg-emerald-900 text-white">{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <h1 className="text-2xl sm:text-3xl font-display font-extrabold tracking-tight text-white">
+                    {activeStudent.name}
+                  </h1>
+                )}
+
                 <div className="flex flex-wrap items-center gap-2 mt-2">
                   <span className="bg-black/25 text-amber-200 text-xs font-bold px-3 py-1 rounded-full border border-white/10">
-                    ID Santri: {user.studentId || 'STR-001'}
+                    ID Santri: {activeStudent.nis || activeStudent.id}
                   </span>
                   <span className="bg-white/15 text-white text-xs font-semibold px-3 py-1 rounded-full border border-white/20">
-                    Kelas 7A (SMP)
+                    Kelas {activeStudent.className || '-'}
                   </span>
                   <span className="bg-emerald-400/20 text-emerald-200 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-400/30">
-                    Halqah 1 (Ikhwan)
+                    {activeStudent.gender === 'L' ? '(Ikhwan)' : activeStudent.gender === 'P' ? '(Akhwat)' : ''}
                   </span>
                 </div>
               </div>
@@ -764,16 +814,20 @@ function Dashboard() {
         {activeTab === 'HOME' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
             <div className="md:col-span-2">
-              <TahfidzWidget studentId={user.studentId} />
+              <TahfidzWidget studentId={activeStudent.id} />
             </div>
             
-            <FinanceWidget studentId={user.studentId} />
+            <FinanceWidget studentId={activeStudent.id} />
             
-            <AttendanceWidget studentId={user.studentId} />
+            <AttendanceWidget studentId={activeStudent.id} />
+
+            <div className="md:col-span-2">
+              <AcademicsWidget studentId={activeStudent.id} />
+            </div>
             
-            <AcademicsWidget studentId={user.studentId} />
-            
-            <CommunicationBookWidget studentId={user.studentId} />
+            <div className="md:col-span-2">
+              <CommunicationBookWidget studentId={activeStudent.id} />
+            </div>
           </div>
         ) : (
           <FamilyProfile />
@@ -792,7 +846,7 @@ function Dashboard() {
 function LinkStudent() {
   const navigate = useNavigate();
   const [nis, setNis] = useState('');
-  const [nik, setNik] = useState('');
+  const [kkNumber, setKkNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
 
@@ -817,22 +871,25 @@ function LinkStudent() {
         body: JSON.stringify({
           userId: user.id,
           nis,
-          nik
+          kkNumber
         })
       });
       
       const responseData = await res.json();
       
       if (res.ok && responseData.success) {
-        const studentId = responseData.data.id;
-        const studentName = responseData.data.name;
-        const userWithStudent = { ...user, studentId, studentName };
-        localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudent));
+        // Fetch the newly linked students array
+        const studentRes = await fetch(`${API_URL}/api/parents/${user.id}/students`, { credentials: 'include' });
+        const studentData = await studentRes.json();
+        const studentsList = (studentData?.data && Array.isArray(studentData.data)) ? studentData.data : [];
+        
+        const userWithStudents = { ...user, students: studentsList };
+        localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudents));
         
         alert(responseData.message || 'Berhasil menghubungkan akun dengan data santri.');
         navigate('/dashboard');
       } else {
-        alert(responseData.error || 'Gagal menghubungkan data santri. Mohon periksa kembali NIS dan NIK.');
+        alert(responseData.error || 'Gagal menghubungkan data santri. Mohon periksa kembali NIS dan No KK.');
       }
     } catch (error) {
       alert('Terjadi kesalahan jaringan.');
@@ -856,7 +913,7 @@ function LinkStudent() {
             Hubungkan Data Santri
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            Demi keamanan, mohon masukkan NIS dan NIK santri untuk menghubungkan akun Anda.
+            Demi keamanan, mohon masukkan NIS dan Nomor Kartu Keluarga untuk menghubungkan akun Anda.
           </p>
         </div>
 
@@ -878,14 +935,14 @@ function LinkStudent() {
 
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                Nomor Induk Kependudukan (NIK)
+                Nomor Kartu Keluarga (No. KK)
               </label>
               <input
                 type="text"
                 required
-                value={nik}
-                onChange={(e) => setNik(e.target.value)}
-                placeholder="16 Digit NIK Santri"
+                value={kkNumber}
+                onChange={(e) => setKkNumber(e.target.value)}
+                placeholder="16 Digit Nomor KK"
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
               />
             </div>
