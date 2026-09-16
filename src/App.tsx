@@ -35,7 +35,7 @@ function Login() {
       if (error) {
         alert(error.message || 'Login gagal. Periksa kembali email dan password.');
         setIsLoading(false);
-      } else if (data.token && data.user) {
+      } else if (data?.user) {
         try {
           const studentRes = await fetch(`${API_URL}/api/parents/${data.user.id}/students`, { credentials: 'include' });
           const studentData = await studentRes.json();
