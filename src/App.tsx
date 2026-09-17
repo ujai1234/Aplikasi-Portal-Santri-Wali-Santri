@@ -18,8 +18,11 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('walidemo@bqa.local');
-  const [password, setPassword] = useState('password123');
+  const [authView, setAuthView] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -54,6 +57,35 @@ function Login() {
           alert('Terjadi kesalahan saat memuat data santri.');
           setIsLoading(false);
         }
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan jaringan');
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      alert('Konfirmasi password tidak cocok!');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { data, error } = await authClient.signUp.email({
+        email,
+        password,
+        name
+      });
+      
+      if (error) {
+        alert(error.message || 'Pendaftaran gagal.');
+        setIsLoading(false);
+      } else if (data?.user) {
+        // Automatically login
+        await authClient.signIn.email({ email, password });
+        localStorage.setItem('portal_santri_user', JSON.stringify({ ...data.user, students: [] }));
+        navigate('/link-student');
       }
     } catch (error) {
       alert('Terjadi kesalahan jaringan');
@@ -98,7 +130,41 @@ function Login() {
         </div>
 
         <div className="bg-white/95 backdrop-blur-xl py-8 px-6 shadow-islamic rounded-3xl border border-slate-200/80 border-t-4 border-t-[#d97706] border-l-4 border-l-[#d97706]">
-          <form className="space-y-5" onSubmit={handleLogin}>
+          
+          <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
+            <button
+              type="button"
+              onClick={() => setAuthView('LOGIN')}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${authView === 'LOGIN' ? 'bg-white text-emerald-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Masuk
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthView('REGISTER')}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${authView === 'REGISTER' ? 'bg-white text-emerald-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Daftar Akun
+            </button>
+          </div>
+
+          <form className="space-y-5" onSubmit={authView === 'LOGIN' ? handleLogin : handleRegister}>
+            {authView === 'REGISTER' && (
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Nama Lengkap
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nama sesuai KTP"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
+                />
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                 Email Wali Santri
@@ -127,6 +193,22 @@ function Login() {
               />
             </div>
 
+            {authView === 'REGISTER' && (
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Konfirmasi Kata Sandi
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
+                />
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isLoading}
@@ -135,52 +217,51 @@ function Login() {
               {isLoading ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Memproses Masuk...</span>
+                  <span>Memproses...</span>
                 </>
               ) : (
                 <>
-                  <span>Masuk Ke Portal</span>
+                  <span>{authView === 'LOGIN' ? 'Masuk Ke Portal' : 'Daftar Sekarang'}</span>
                   <ChevronRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-5 mb-5 flex items-center gap-3">
-            <div className="flex-1 h-px bg-slate-200"></div>
-            <span className="text-xs font-semibold text-slate-400 uppercase">Atau</span>
-            <div className="flex-1 h-px bg-slate-200"></div>
-          </div>
+          {authView === 'LOGIN' && (
+            <>
+              <div className="mt-5 mb-5 flex items-center gap-3">
+                <div className="flex-1 h-px bg-slate-200"></div>
+                <span className="text-xs font-semibold text-slate-400 uppercase">Atau</span>
+                <div className="flex-1 h-px bg-slate-200"></div>
+              </div>
 
-          <button
-            onClick={handleGoogleLogin}
-            disabled={isGoogleLoading || isLoading}
-            type="button"
-            className="w-full flex justify-center items-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl shadow-sm text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all cursor-pointer disabled:opacity-50"
-          >
-            {isGoogleLoading ? (
-              <>
-                <RefreshCw className="w-5 h-5 animate-spin text-slate-500" />
-                <span>Menghubungkan ke Google...</span>
-              </>
-            ) : (
-              <>
-                <svg viewBox="0 0 24 24" className="w-5 h-5">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                <span>Masuk dengan Google</span>
-              </>
-            )}
-          </button>
+              <button
+                onClick={handleGoogleLogin}
+                disabled={isGoogleLoading || isLoading}
+                type="button"
+                className="w-full flex justify-center items-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl shadow-sm text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isGoogleLoading ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin text-slate-500" />
+                    <span>Menghubungkan ke Google...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" className="w-5 h-5">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    <span>Masuk dengan Google</span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
 
-          <div className="mt-6 pt-5 border-t border-slate-100 text-center">
-            <p className="text-xs text-slate-500">
-              Demo Wali: <span className="font-semibold text-emerald-800">walidemo@bqa.local</span> (Password: <span className="font-semibold text-slate-700">password123</span>)
-            </p>
-          </div>
         </div>
       </div>
     </div>
