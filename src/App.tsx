@@ -653,6 +653,23 @@ function ParentFeedbackWidget({ studentId }: { studentId: string }) {
   const [category, setCategory] = useState('SARAN');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+
+  const fetchFeedbacks = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/parents/feedbacks/me`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setFeedbacks(data.data || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -669,8 +686,9 @@ function ParentFeedbackWidget({ studentId }: { studentId: string }) {
         body: JSON.stringify({ studentId, category, message })
       });
       if (res.ok) {
-        alert('Masukan Anda telah berhasil terkirim ke Pimpinan & Admin Yayasan.');
+        alert('Masukan Anda telah berhasil terkirim.');
         setMessage('');
+        fetchFeedbacks();
       } else {
         const err = await res.json().catch(() => ({}));
         alert(err.error || 'Gagal mengirim masukan.');
@@ -683,40 +701,65 @@ function ParentFeedbackWidget({ studentId }: { studentId: string }) {
   };
 
   return (
-    <div className="bqa-card p-4">
-      <h3 className="text-sm font-bold text-slate-900 mb-4">Kirim Masukan</h3>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div>
-          <select 
-            value={category} 
-            onChange={e => setCategory(e.target.value)}
-            className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          >
-            <option value="SARAN">Saran & Masukan</option>
-            <option value="PERTANYAAN">Pertanyaan</option>
-            <option value="APRESIASI">Apresiasi</option>
-            <option value="KELUHAN">Keluhan</option>
-          </select>
+    <div className="space-y-4">
+      <div className="bqa-card p-4">
+        <h3 className="text-sm font-bold text-slate-900 mb-4">Kirim Masukan</h3>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <select 
+              value={category} 
+              onChange={e => setCategory(e.target.value)}
+              className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            >
+              <option value="SARAN">Saran & Masukan</option>
+              <option value="PERTANYAAN">Pertanyaan</option>
+              <option value="APRESIASI">Apresiasi</option>
+              <option value="KELUHAN">Keluhan</option>
+            </select>
+          </div>
+          <div>
+            <textarea
+              rows={3}
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              placeholder="Tulis pesan..."
+              className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder-slate-400"
+            />
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="bg-[#065f46] hover:bg-[#047857] text-white px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50"
+            >
+              {submitting ? 'Mengirim...' : 'Kirim'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {feedbacks.length > 0 && (
+        <div className="bqa-card p-4">
+          <h3 className="text-sm font-bold text-slate-900 mb-4">Riwayat Masukan</h3>
+          <div className="space-y-3">
+            {feedbacks.map(fb => (
+              <div key={fb.id} className="p-3 bg-slate-50 border border-slate-100 rounded-lg">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">{fb.category}</span>
+                  <span className="text-[10px] text-slate-400">{new Date(fb.createdAt).toLocaleDateString('id-ID')}</span>
+                </div>
+                <p className="text-xs text-slate-700 mb-2">{fb.message}</p>
+                {fb.adminResponse && (
+                  <div className="mt-2 p-2 bg-emerald-50/50 border-l-2 border-emerald-500 text-xs">
+                    <span className="font-bold text-emerald-800">Balasan Yayasan:</span>
+                    <p className="text-emerald-700 mt-1">{fb.adminResponse}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-        <div>
-          <textarea
-            rows={3}
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            placeholder="Tulis pesan..."
-            className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder-slate-400"
-          />
-        </div>
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="bg-[#065f46] hover:bg-[#047857] text-white px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50"
-          >
-            {submitting ? 'Mengirim...' : 'Kirim'}
-          </button>
-        </div>
-      </form>
+      )}
     </div>
   );
 }
