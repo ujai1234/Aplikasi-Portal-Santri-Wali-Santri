@@ -923,27 +923,27 @@ function Dashboard() {
       <SessionTimeoutManager />
       {/* Top Navbar */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-soft">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <BrandLogo size="sm" />
-              <div>
-                <span className="font-display font-extrabold text-base text-slate-900 tracking-tight block leading-tight">
+              <div className="hidden sm:block">
+                <span className="font-display font-extrabold text-sm sm:text-base text-slate-900 tracking-tight block leading-tight">
                   Portal Santri & Wali
                 </span>
-                <span className="text-[10px] font-semibold text-emerald-800 uppercase tracking-widest block">
+                <span className="text-[8px] sm:text-[10px] font-semibold text-emerald-800 uppercase tracking-widest block">
                   Baitul Qur'an Al-Ikhwan
                 </span>
               </div>
             </div>
 
             {/* Navigation & User Action */}
-            <div className="flex items-center gap-4 sm:gap-6">
-              <div className="flex items-center gap-1 sm:gap-3 border-r border-slate-200 pr-3 sm:pr-6">
+            <div className="flex items-center gap-1.5 sm:gap-6">
+              <div className="flex items-center gap-1 sm:gap-3 border-r border-slate-200 pr-1.5 sm:pr-6">
                 <button 
                   onClick={() => setActiveTab('HOME')} 
-                  className={`text-xs font-bold transition-all py-2 px-3 rounded-xl cursor-pointer ${
+                  className={`text-[10px] sm:text-xs font-bold transition-all py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl cursor-pointer ${
                     activeTab === 'HOME' 
                       ? 'bg-emerald-50 text-[#065f46] border border-emerald-200 shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -953,13 +953,13 @@ function Dashboard() {
                 </button>
                 <button 
                   onClick={() => setActiveTab('PROFILE')} 
-                  className={`text-xs font-bold transition-all py-2 px-3 rounded-xl cursor-pointer ${
+                  className={`text-[10px] sm:text-xs font-bold transition-all py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl cursor-pointer ${
                     activeTab === 'PROFILE' 
                       ? 'bg-emerald-50 text-[#065f46] border border-emerald-200 shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  Profil Keluarga
+                  Profil<span className="hidden sm:inline"> Keluarga</span>
                 </button>
               </div>
               
@@ -978,7 +978,7 @@ function Dashboard() {
                   localStorage.removeItem('portal_santri_user');
                   navigate('/login');
                 }}
-                className="inline-flex items-center gap-1 text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white px-3 py-2 rounded-xl transition-all border border-rose-200 cursor-pointer"
+                className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl transition-all border border-rose-200 cursor-pointer shrink-0"
                 title="Keluar dari akun"
               >
                 <LogOut className="w-3.5 h-3.5" />
