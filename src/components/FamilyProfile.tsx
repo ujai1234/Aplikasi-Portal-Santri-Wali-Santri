@@ -47,15 +47,20 @@ export const FamilyProfile = () => {
               kkUrl: data.data.kkUrl || '',
               scholarshipDocUrl: data.data.scholarshipDocUrl || ''
             });
+          } else {
+            // Parent record hasn't been created yet in parents table
+            setParentData({ id: currentUser.id, isNew: true });
           }
           setLoading(false);
         })
         .catch(err => {
           console.error(err);
+          setParentData({ id: currentUser.id, isNew: true });
           setLoading(false);
         });
     }
   }, [currentUser.id]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -86,20 +91,29 @@ export const FamilyProfile = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!parentData?.id) return;
+    const targetId = parentData?.id || currentUser?.id;
+    if (!targetId) {
+      alert('Sesi tidak terdeteksi. Silakan re-login.');
+      return;
+    }
     
     setSaving(true);
     try {
-      const res = await fetch(`${API_URL}/api/parents/${parentData.id}`, {
+      const res = await fetch(`${API_URL}/api/parents/${targetId}`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
       if (res.ok) {
+        const result = await res.json();
+        if (result.data) {
+          setParentData(result.data);
+        }
         alert('Profil keluarga berhasil disimpan dan tersinkronisasi');
       } else {
-        alert('Gagal menyimpan profil');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Gagal menyimpan profil');
       }
     } catch (err) {
       alert('Terjadi kesalahan jaringan');
@@ -107,6 +121,7 @@ export const FamilyProfile = () => {
       setSaving(false);
     }
   };
+
 
   if (loading) {
     return (

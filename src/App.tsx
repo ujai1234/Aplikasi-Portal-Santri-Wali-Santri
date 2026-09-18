@@ -488,13 +488,18 @@ function FinanceWidget({ studentId }: { studentId: string }) {
 
 function TahfidzWidget({ studentId }: { studentId: string }) {
   const [tahfidz, setTahfidz] = useState<any>(null);
+  const [evaluations, setEvaluations] = useState<any[]>([]);
+  const [showAllEvals, setShowAllEvals] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/tahfidz/student-progress/${studentId}`, { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        setTahfidz(data.data);
+    Promise.all([
+      fetch(`${API_URL}/api/tahfidz/student-progress/${studentId}`, { credentials: 'include' }).then(r => r.json()),
+      fetch(`${API_URL}/api/tahfidz/evaluations/${studentId}`, { credentials: 'include' }).then(r => r.json())
+    ])
+      .then(([progressRes, evalsRes]) => {
+        setTahfidz(progressRes.data);
+        if (evalsRes.data) setEvaluations(evalsRes.data);
         setLoading(false);
       })
       .catch(err => {
@@ -507,7 +512,7 @@ function TahfidzWidget({ studentId }: { studentId: string }) {
     return (
       <div className="bqa-card p-6 text-center">
         <RefreshCw className="animate-spin w-6 h-6 mx-auto text-emerald-600 mb-2" />
-        <p className="text-xs text-slate-500">Memuat capaian tahfidz...</p>
+        <p className="text-xs text-slate-500">Memuat evaluasi harian tahfidz...</p>
       </div>
     );
   }
@@ -517,9 +522,19 @@ function TahfidzWidget({ studentId }: { studentId: string }) {
 
   return (
     <div className="bqa-card p-6">
-      <div className="mb-5 pb-3 border-b border-slate-100">
-        <h3 className="text-base font-bold text-slate-900 tracking-tight">Hafalan & Tahfidz Al-Qur'an</h3>
-        <p className="text-xs text-slate-500 font-medium mt-0.5">Progres & Hasil Ujian Tasmi'</p>
+      <div className="mb-5 pb-3 border-b border-slate-100 flex justify-between items-center">
+        <div>
+          <h3 className="text-base font-bold text-slate-900 tracking-tight">Hafalan & Evaluasi Harian Tahfidz</h3>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">Setoran Hafalan Sesi Subuh & Maghrib serta Hasil Tasmi'</p>
+        </div>
+        {evaluations.length > 0 && (
+          <button 
+            onClick={() => setShowAllEvals(!showAllEvals)} 
+            className="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+          >
+            {showAllEvals ? 'Tutup Riwayat' : `Lihat Riwayat (${evaluations.length})`}
+          </button>
+        )}
       </div>
 
       {tahfidz ? (
@@ -566,11 +581,11 @@ function TahfidzWidget({ studentId }: { studentId: string }) {
           </div>
           
           {/* Setoran Terakhir Detail */}
-          {tahfidz.lastEvaluation && (
+          {tahfidz.lastEvaluation && !showAllEvals && (
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#d97706]" /> Setoran Terakhir
+                  <Sparkles className="w-3.5 h-3.5 text-[#d97706]" /> Evaluasi Terakhir
                 </span>
                 <span className="text-[11px] font-medium text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
                   {new Date(tahfidz.lastEvaluation.date).toLocaleDateString('id-ID')}
@@ -586,7 +601,7 @@ function TahfidzWidget({ studentId }: { studentId: string }) {
                   ✓ {tahfidz.lastEvaluation.status}
                 </span>
                 <span className="text-xs font-medium text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                  {tahfidz.lastEvaluation.session}
+                  Sesi {tahfidz.lastEvaluation.session}
                 </span>
               </div>
 
@@ -601,6 +616,29 @@ function TahfidzWidget({ studentId }: { studentId: string }) {
               </p>
             </div>
           )}
+
+          {/* List All Daily Evaluations */}
+          {showAllEvals && (
+            <div className="space-y-3 pt-2">
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Riwayat Evaluasi Harian:</h4>
+              {evaluations.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">Belum ada riwayat evaluasi harian.</p>
+              ) : (
+                evaluations.map((ev) => (
+                  <div key={ev.id} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-800">
+                      <span>Sesi {ev.session} ({new Date(ev.date).toLocaleDateString('id-ID')})</span>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] ${ev.status === 'Tuntas' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                        {ev.status}
+                      </span>
+                    </div>
+                    {ev.notes && <p className="text-xs text-slate-600 italic">"{ev.notes}"</p>}
+                    <p className="text-[10px] text-slate-400 text-right">Pengampu: {ev.teacherName || 'Muallim'}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-500 text-xs italic">
@@ -610,6 +648,91 @@ function TahfidzWidget({ studentId }: { studentId: string }) {
     </div>
   );
 }
+
+function ParentFeedbackWidget({ studentId }: { studentId: string }) {
+  const [category, setCategory] = useState('SARAN');
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) {
+      alert('Pesan masukan tidak boleh kosong');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_URL}/api/parent-feedbacks`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, category, message })
+      });
+      if (res.ok) {
+        alert('Masukan Anda telah berhasil terkirim ke Pimpinan & Admin Yayasan.');
+        setMessage('');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Gagal mengirim masukan.');
+      }
+    } catch (e) {
+      alert('Terjadi kesalahan jaringan.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="bqa-card p-6">
+      <div className="mb-5 pb-3 border-b border-slate-100">
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">Kirim Masukan Wali Santri</h3>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">Pesan, Saran, dan Pertanyaan Langsung ke Pengurus & Admin Yayasan</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            Kategori Masukan
+          </label>
+          <select 
+            value={category} 
+            onChange={e => setCategory(e.target.value)}
+            className="w-full text-xs font-semibold px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-slate-800"
+          >
+            <option value="SARAN">Saran & Masukan</option>
+            <option value="PERTANYAAN">Pertanyaan / Informasi</option>
+            <option value="APRESIASI">Apresiasi & Ucapan Terima Kasih</option>
+            <option value="KELUHAN">Keluhan & Kendala</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            Pesan Masukan (Teks Only)
+          </label>
+          <textarea
+            rows={4}
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            placeholder="Tuliskan masukan, pertanyaan, atau tanggapan Anda secara ringkas dan jelas di sini..."
+            className="w-full text-xs font-semibold p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-slate-800 placeholder-slate-400 leading-relaxed"
+          />
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="bg-[#065f46] hover:bg-[#047857] active:scale-95 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 shadow-sm cursor-pointer"
+          >
+            {submitting ? 'Mengirim...' : 'Kirim Masukan'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 
 function AcademicsWidget({ studentId }: { studentId: string }) {
   const [grades, setGrades] = useState<any[]>([]);
@@ -923,10 +1046,15 @@ function Dashboard() {
             <div className="md:col-span-2">
               <CommunicationBookWidget studentId={activeStudent.id} />
             </div>
+
+            <div className="md:col-span-2">
+              <ParentFeedbackWidget studentId={activeStudent.id} />
+            </div>
           </div>
         ) : (
           <FamilyProfile />
         )}
+
       </main>
 
       {/* Footer */}
