@@ -48,6 +48,12 @@ RUN printf 'server {\n\
 
 EXPOSE 80
 
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
+# Healthcheck for Coolify
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:80/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
+
