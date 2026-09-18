@@ -683,49 +683,37 @@ function ParentFeedbackWidget({ studentId }: { studentId: string }) {
   };
 
   return (
-    <div className="bqa-card p-6">
-      <div className="mb-5 pb-3 border-b border-slate-100">
-        <h3 className="text-base font-bold text-slate-900 tracking-tight">Kirim Masukan Wali Santri</h3>
-        <p className="text-xs text-slate-500 font-medium mt-0.5">Pesan, Saran, dan Pertanyaan Langsung ke Pengurus & Admin Yayasan</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="bqa-card p-4">
+      <h3 className="text-sm font-bold text-slate-900 mb-4">Kirim Masukan</h3>
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Kategori Masukan
-          </label>
           <select 
             value={category} 
             onChange={e => setCategory(e.target.value)}
-            className="w-full text-xs font-semibold px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-slate-800"
+            className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
           >
             <option value="SARAN">Saran & Masukan</option>
-            <option value="PERTANYAAN">Pertanyaan / Informasi</option>
-            <option value="APRESIASI">Apresiasi & Ucapan Terima Kasih</option>
-            <option value="KELUHAN">Keluhan & Kendala</option>
+            <option value="PERTANYAAN">Pertanyaan</option>
+            <option value="APRESIASI">Apresiasi</option>
+            <option value="KELUHAN">Keluhan</option>
           </select>
         </div>
-
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Pesan Masukan (Teks Only)
-          </label>
           <textarea
-            rows={4}
+            rows={3}
             value={message}
             onChange={e => setMessage(e.target.value)}
-            placeholder="Tuliskan masukan, pertanyaan, atau tanggapan Anda secara ringkas dan jelas di sini..."
-            className="w-full text-xs font-semibold p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all text-slate-800 placeholder-slate-400 leading-relaxed"
+            placeholder="Tulis pesan..."
+            className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder-slate-400"
           />
         </div>
-
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={submitting}
-            className="bg-[#065f46] hover:bg-[#047857] active:scale-95 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 shadow-sm cursor-pointer"
+            className="bg-[#065f46] hover:bg-[#047857] text-white px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50"
           >
-            {submitting ? 'Mengirim...' : 'Kirim Masukan'}
+            {submitting ? 'Mengirim...' : 'Kirim'}
           </button>
         </div>
       </form>
