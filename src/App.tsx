@@ -458,7 +458,7 @@ function FinanceWidget({ studentId }: { studentId: string }) {
                   <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full">
                     <Check className="w-3 h-3" /> LUNAS
                   </span>
-                ) : pay.status === 'MENUNGGU VERIFIKASI' ? (
+                ) : pay.status === 'MENUNGGU_VERIFIKASI' ? (
                   <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full">
                     <Clock className="w-3 h-3 animate-spin" /> PROSES VERIFIKASI
                   </span>
@@ -469,7 +469,7 @@ function FinanceWidget({ studentId }: { studentId: string }) {
                 )}
               </div>
 
-              {pay.status !== 'LUNAS' && pay.status !== 'MENUNGGU VERIFIKASI' && (
+              {pay.status !== 'LUNAS' && pay.status !== 'MENUNGGU_VERIFIKASI' && (
                 <button 
                   onClick={() => handleUploadClick(pay.id)}
                   className="mt-3 w-full text-xs bg-[#065f46] hover:bg-[#047857] text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
