@@ -443,66 +443,59 @@ function FinanceWidget({ studentId }: { studentId: string }) {
           <p className="text-xs text-slate-500 italic">Tidak ada kewajiban tagihan aktif saat ini.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-0">
           {payments.map((pay) => (
-            <div key={pay.id} className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80 transition-all hover:bg-slate-50">
-              <div className="flex justify-between items-start mb-2">
+            <div key={pay.id} className="py-3.5 border-b border-slate-100 last:border-0 flex flex-col gap-1.5">
+              <div className="flex justify-between items-center">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Bulan Tagihan</span>
-                  <p className="text-sm font-bold text-slate-900">SPP Periode {pay.billingMonth}</p>
-                  <p className="text-lg font-extrabold text-emerald-800 mt-0.5">
+                  <p className="text-sm font-semibold text-slate-800">SPP Periode {pay.billingMonth}</p>
+                  <p className="text-xs font-medium text-slate-500 mt-0.5">
                     Rp {pay.amount.toLocaleString('id-ID')}
                   </p>
                 </div>
-                {pay.status === 'LUNAS' ? (
-                  <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full">
-                    <Check className="w-3 h-3" /> LUNAS
-                  </span>
-                ) : pay.status === 'MENUNGGU_VERIFIKASI' ? (
-                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full">
-                    <Clock className="w-3 h-3 animate-spin" /> PROSES VERIFIKASI
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold px-2.5 py-1 rounded-full">
-                    BELUM BAYAR
-                  </span>
-                )}
+                <div>
+                  {pay.status === 'LUNAS' ? (
+                    <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1"><Check className="w-3 h-3" /> LUNAS</span>
+                  ) : pay.status === 'MENUNGGU_VERIFIKASI' ? (
+                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1"><Clock className="w-3 h-3 animate-spin" /> PROSES</span>
+                  ) : (
+                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">BELUM BAYAR</span>
+                  )}
+                </div>
               </div>
 
               {pay.status !== 'LUNAS' && pay.status !== 'MENUNGGU_VERIFIKASI' && (
-                <div className="mt-3 flex gap-2">
+                <div className="flex items-center gap-4 mt-2">
                   <button 
                     onClick={() => handleUploadClick(pay.id)}
-                    className="flex-1 text-[11px] bg-[#065f46] hover:bg-[#047857] text-white font-bold py-2 px-2 rounded-xl transition-all shadow-sm flex flex-col items-center justify-center gap-1 cursor-pointer"
+                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer transition-colors"
                   >
-                    <UploadCloud className="w-4 h-4" />
-                    Transfer Bank
+                    <UploadCloud className="w-3.5 h-3.5" /> Transfer Bank
                   </button>
+                  <span className="text-slate-200 text-xs">|</span>
                   <button 
                     onClick={async () => {
-                      if(window.confirm('Konfirmasi bahwa Anda akan/sudah membayar tunai (cash) di Tata Usaha?')) {
-                        try {
-                          const res = await fetch(`${API_URL}/api/students/${studentId}/payments/${pay.id}/upload`, {
-                            method: 'POST',
-                            credentials: 'include',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ receiptUrl: 'BAYAR_CASH' })
-                          });
-                          if (res.ok) {
-                            alert('Metode pembayaran tunai berhasil dikonfirmasi.');
-                            fetchPayments();
-                          } else {
-                            alert('Gagal mengkonfirmasi pembayaran.');
-                          }
-                        } catch (e) {
-                          alert('Kesalahan jaringan');
+                      try {
+                        const res = await fetch(`${API_URL}/api/students/${studentId}/payments/${pay.id}/upload`, {
+                          method: 'POST',
+                          credentials: 'include',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ receiptUrl: 'BAYAR_CASH' })
+                        });
+                        if (res.ok) {
+                          alert('Pembayaran tunai berhasil dicatat dan menunggu verifikasi admin.');
+                          fetchPayments();
+                        } else {
+                          const err = await res.json().catch(() => ({}));
+                          alert(err.error || 'Gagal mengkonfirmasi pembayaran.');
                         }
+                      } catch (e) {
+                        alert('Kesalahan jaringan');
                       }
                     }}
-                    className="flex-1 text-[11px] bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-2 rounded-xl transition-all shadow-sm flex flex-col items-center justify-center gap-1 cursor-pointer"
+                    className="text-[11px] font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 cursor-pointer transition-colors"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    Tunai di TU
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Tunai di TU
                   </button>
                 </div>
               )}
