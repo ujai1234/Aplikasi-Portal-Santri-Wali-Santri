@@ -470,13 +470,41 @@ function FinanceWidget({ studentId }: { studentId: string }) {
               </div>
 
               {pay.status !== 'LUNAS' && pay.status !== 'MENUNGGU_VERIFIKASI' && (
-                <button 
-                  onClick={() => handleUploadClick(pay.id)}
-                  className="mt-3 w-full text-xs bg-[#065f46] hover:bg-[#047857] text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <UploadCloud className="w-4 h-4" />
-                  Upload Bukti Pembayaran
-                </button>
+                <div className="mt-3 flex gap-2">
+                  <button 
+                    onClick={() => handleUploadClick(pay.id)}
+                    className="flex-1 text-[11px] bg-[#065f46] hover:bg-[#047857] text-white font-bold py-2 px-2 rounded-xl transition-all shadow-sm flex flex-col items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <UploadCloud className="w-4 h-4" />
+                    Transfer Bank
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      if(window.confirm('Konfirmasi bahwa Anda akan/sudah membayar tunai (cash) di Tata Usaha?')) {
+                        try {
+                          const res = await fetch(`${API_URL}/api/students/${studentId}/payments/${pay.id}/upload`, {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ receiptUrl: 'BAYAR_CASH' })
+                          });
+                          if (res.ok) {
+                            alert('Metode pembayaran tunai berhasil dikonfirmasi.');
+                            fetchPayments();
+                          } else {
+                            alert('Gagal mengkonfirmasi pembayaran.');
+                          }
+                        } catch (e) {
+                          alert('Kesalahan jaringan');
+                        }
+                      }
+                    }}
+                    className="flex-1 text-[11px] bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-2 rounded-xl transition-all shadow-sm flex flex-col items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Tunai di TU
+                  </button>
+                </div>
               )}
             </div>
           ))}
