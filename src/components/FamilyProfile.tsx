@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Save, ShieldCheck, Image as ImageIcon, FileText, X } from 'lucide-react';
+import { User, Save, ShieldCheck, Image as ImageIcon, FileText, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { compressImage } from '../utils/imageUtils';
 
 
@@ -9,6 +9,7 @@ export const FamilyProfile = () => {
   const [parentData, setParentData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
   const [formData, setFormData] = useState({
     nik: '',
     kkNumber: '',
@@ -25,6 +26,11 @@ export const FamilyProfile = () => {
   });
 
   const currentUser = JSON.parse(localStorage.getItem('portal_santri_user') || '{}');
+
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   useEffect(() => {
     if (currentUser.id) {
@@ -70,7 +76,7 @@ export const FamilyProfile = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file maksimal 5MB');
+      showNotification('Ukuran file maksimal 5MB', 'error');
       return;
     }
     setSaving(true);
@@ -79,7 +85,7 @@ export const FamilyProfile = () => {
       setFormData({ ...formData, [fieldName]: compressedBase64 });
     } catch (error) {
       console.error(error);
-      alert('Gagal memproses gambar');
+      showNotification('Gagal memproses gambar', 'error');
     } finally {
       setSaving(false);
     }
@@ -93,7 +99,7 @@ export const FamilyProfile = () => {
     e.preventDefault();
     const targetId = parentData?.id || currentUser?.id;
     if (!targetId) {
-      alert('Sesi tidak terdeteksi. Silakan re-login.');
+      showNotification('Sesi tidak terdeteksi. Silakan re-login.', 'error');
       return;
     }
     
@@ -110,13 +116,13 @@ export const FamilyProfile = () => {
         if (result.data) {
           setParentData(result.data);
         }
-        alert('Profil keluarga berhasil disimpan dan tersinkronisasi');
+        showNotification('Profil keluarga berhasil disimpan dan tersinkronisasi', 'success');
       } else {
         const errData = await res.json().catch(() => ({}));
-        alert(errData.error || 'Gagal menyimpan profil');
+        showNotification(errData.error || 'Gagal menyimpan profil', 'error');
       }
     } catch (err) {
-      alert('Terjadi kesalahan jaringan');
+      showNotification('Terjadi kesalahan jaringan', 'error');
     } finally {
       setSaving(false);
     }
@@ -142,6 +148,31 @@ export const FamilyProfile = () => {
           <p className="text-xs text-slate-500 font-medium mt-0.5">Fasilitas Pembaruan Mandiri (Self-Service MDM) Terhubung Langsung dengan HRIS Yayasan</p>
         </div>
       </div>
+
+      {notification && (
+        <div className={`p-4 mb-6 rounded-xl border flex items-start gap-3 transition-all ${
+          notification.type === 'success' 
+            ? 'bg-emerald-50 border-emerald-200 text-[#065f46]' 
+            : 'bg-red-50 border-red-200 text-red-700'
+        }`}>
+          {notification.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+          ) : (
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          )}
+          <div className="flex-1">
+            <h4 className="font-bold text-sm mb-0.5">{notification.type === 'success' ? 'Berhasil' : 'Peringatan'}</h4>
+            <p className="text-xs leading-relaxed opacity-90">{notification.message}</p>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setNotification(null)}
+            className="p-1 hover:bg-black/5 rounded-md transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSave} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
