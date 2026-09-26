@@ -26,6 +26,36 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  // Hook into better-auth session for Google Auth redirects
+  const { data: session, isPending: sessionPending } = authClient.useSession();
+
+  useEffect(() => {
+    const localData = localStorage.getItem('portal_santri_user');
+    // If no localStorage but we have a valid session (e.g. just returned from Google OAuth)
+    if (!localData && session?.user && !sessionPending && !isLoading) {
+      setIsLoading(true);
+      fetch(`${API_URL}/api/parents/${session.user.id}/students`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(studentData => {
+          if (studentData?.data && Array.isArray(studentData.data) && studentData.data.length > 0) {
+            const userWithStudents = { ...session.user, students: studentData.data }; 
+            localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudents));
+            navigate('/dashboard');
+          } else {
+            localStorage.setItem('portal_santri_user', JSON.stringify({ ...session.user, students: [] }));
+            navigate('/link-student');
+          }
+        })
+        .catch(err => {
+          console.error('Session sync error:', err);
+          setIsLoading(false);
+        });
+    } else if (localData) {
+      // If we already have localStorage and it's valid, redirect immediately
+      navigate('/dashboard');
+    }
+  }, [session, sessionPending, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
