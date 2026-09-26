@@ -98,7 +98,7 @@ function Login() {
     try {
       await authClient.signIn.social({
         provider: 'google',
-        callbackURL: '/dashboard'
+        callbackURL: `${window.location.origin}/dashboard`
       });
       // Do not set isGoogleLoading to false here immediately, because it redirects
     } catch (error) {
