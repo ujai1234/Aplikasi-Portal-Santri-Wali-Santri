@@ -129,6 +129,7 @@ function Login() {
       await authClient.signIn.social({
         provider: 'google',
         callbackURL: `${window.location.origin}/dashboard`,
+        // @ts-ignore
         errorURL: `${window.location.origin}/login`
       });
       // Do not set isGoogleLoading to false here immediately, because it redirects
