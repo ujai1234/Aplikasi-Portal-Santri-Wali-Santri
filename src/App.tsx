@@ -30,6 +30,19 @@ function Login() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
 
   useEffect(() => {
+    // Check for oauth error query param
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    if (errorParam) {
+      if (errorParam === 'account_not_linked') {
+        alert('Akun Google ini belum terhubung dengan akun Anda. Silakan hubungkan akun atau login dengan email dan password.');
+      } else {
+        alert(`Gagal login via Google: ${errorParam}`);
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
     const localData = localStorage.getItem('portal_santri_user');
     // If no localStorage but we have a valid session (e.g. just returned from Google OAuth)
     if (!localData && session?.user && !sessionPending && !isLoading) {
@@ -128,7 +141,7 @@ function Login() {
     try {
       await authClient.signIn.social({
         provider: 'google',
-        callbackURL: `${window.location.origin}/dashboard`,
+        callbackURL: `${window.location.origin}/login`,
         // @ts-ignore
         errorURL: `${window.location.origin}/login`
       });
@@ -954,17 +967,30 @@ function CommunicationBookWidget({ studentId }: { studentId: string }) {
 function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const [activeTab, setActiveTab] = useState<'HOME' | 'PROFILE'>('HOME');
   const [activeStudentIndex, setActiveStudentIndex] = useState(0);
 
   useEffect(() => {
     const data = localStorage.getItem('portal_santri_user');
-    if (!data) {
-      navigate('/login');
-    } else {
+    if (data) {
       setUser(JSON.parse(data));
+    } else if (!sessionPending) {
+      if (session?.user) {
+        fetch(`${API_URL}/api/parents/${session.user.id}/students`, { credentials: 'include' })
+          .then(res => res.json())
+          .then(studentData => {
+            const students = Array.isArray(studentData?.data) ? studentData.data : [];
+            const userWithStudents = { ...session.user, students };
+            localStorage.setItem('portal_santri_user', JSON.stringify(userWithStudents));
+            setUser(userWithStudents);
+          })
+          .catch(() => navigate('/login'));
+      } else {
+        navigate('/login');
+      }
     }
-  }, [navigate]);
+  }, [navigate, session, sessionPending]);
 
   if (!user) return null;
 
